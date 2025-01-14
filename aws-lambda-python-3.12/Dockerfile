@@ -2,7 +2,7 @@
 FROM public.ecr.aws/sam/build-python3.12:latest
 
 LABEL python="3.12"
-LABEL node="22.x"
+LABEL node="20.x"
 LABEL poetry="1.8.4"
 LABEL yarn="1.22.22"
 
@@ -13,7 +13,7 @@ ENV PATH="$PATH:~/.local/bin"
 
 
 # Install all other packages
-RUN yum install -y nano wget zip
+RUN dnf install -y nano wget zip
 
 
 ARG TARGETPLATFORM
@@ -23,18 +23,21 @@ RUN echo "@@@ @@@ @@@ @@@ Building for ${TARGETPLATFORM}"
 ARG TARGETPLATFORM
 RUN ARCH="$TARGETPLATFORM"; \
   if [ "$ARCH" == "linux/arm64" ]; then \
-    yum install -y libxslt-devel libxml2-devel; \
+    dnf install -y libxslt-devel libxml2-devel; \
   else \
     echo "x86 skipping lxml dependency install"; \
   fi
 
 
-# Install nodejs 22.x:
+# Install nodejs 20.x:
 # https://stackoverflow.com/a/35165401/2426653
 # Cannot install 18.x due to glibc 2.28 dependency:
 # https://stackoverflow.com/a/74896209/2426653
-RUN yum install -y https://rpm.nodesource.com/pub_22.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
-RUN yum install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1
+# RUN dnf install -y https://rpm.nodesource.com/pub_20.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+# RUN dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1
+
+RUN curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+RUN dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1
 
 
 # Install poetry and sorting plugin
@@ -44,7 +47,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.4 && \
 
 # install yarn classic
 RUN curl -sL https://dl.yarnpkg.com/rpm/yarn.repo -o /etc/yum.repos.d/yarn.repo && \
-  yum install -y yarn
+  dnf install -y yarn
 
 
 # Install Go

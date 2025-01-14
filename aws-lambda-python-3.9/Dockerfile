@@ -11,9 +11,14 @@ LABEL yarn="1.22.19"
 # https://python-poetry.org/docs/#installation
 ENV PATH "$PATH:~/.local/bin"
 
+# Amazon Linux 2023 uses dnf as the package manager, replacing yum.
+# which was the default package manager in Amazon Linux 2.
+# AL2023 base image for Lambda uses microdnf as the package manager,
+# which is a standalone implementation of dnf based on libdnf and
+# does not require extra dependencies such as Python
 
 # Install all other packages
-RUN yum install -y nano \
+RUN dnf install -y nano \
   wget \
   zip
 
@@ -22,8 +27,8 @@ RUN yum install -y nano \
 # https://stackoverflow.com/a/35165401/2426653
 # Cannot install 18.x due to glibc 2.28 dependency:
 # https://stackoverflow.com/a/74896209/2426653
-RUN yum install -y https://rpm.nodesource.com/pub_16.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
-RUN yum install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1
+RUN dnf install -y https://rpm.nodesource.com/pub_16.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm
+RUN dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1
 
 
 # Install poetry and sorting plugin
@@ -33,7 +38,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.1 && \
 
 # install yarn classic
 RUN curl -sL https://dl.yarnpkg.com/rpm/yarn.repo -o /etc/yum.repos.d/yarn.repo && \
-  yum install -y yarn
+  dnf install -y yarn
 
 
 ARG TARGETPLATFORM
